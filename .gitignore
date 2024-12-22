@@ -1,3 +1,5 @@
 .venv
 .idea
-test_main.http
+db.sqlite3
+db.sqlite3-shm
+db.sqlite3-wal
