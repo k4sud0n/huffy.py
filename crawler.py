@@ -37,6 +37,39 @@ async def fetch_hufs_notice(url_id):
                     )
 
 
+async def fetch_ai_notice(url):
+    week_ago = datetime.now() - timedelta(days=7)
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            data = await response.text()
+
+            doc = pq(data)
+            rows = doc("tr")
+
+            for row in rows.items():
+                notice_date_str = row.find("td:nth-child(2)").text().strip()
+                try:
+                    notice_date = datetime.strptime(notice_date_str, "%Y-%m-%d")
+                except ValueError:
+                    continue
+
+                if notice_date > week_ago:
+                    notice_title = row.find("td.title a").text().strip()
+                    notice_link = row.find("td.title a").attr("href")
+                    notice_link = (
+                        notice_link
+                        if notice_link.startswith("https")
+                        else "http://builder.hufs.ac.kr/user/" + notice_link
+                    )
+
+                    await Notice.create(
+                        date=notice_date,
+                        title=notice_title,
+                        link=notice_link,
+                    )
+
+
 async def fetch_menu(cafeteria_id):
     today_date = datetime.now().strftime("%Y%m%d")
     url = f"https://wis.hufs.ac.kr/jsp/HUFS/cafeteria/viewWeek.jsp?startDt={today_date}&endDt={today_date}&caf_id={cafeteria_id}"
@@ -67,6 +100,7 @@ async def fetch_menu(cafeteria_id):
 
 NOTICE_HANDLERS = {
     "hufs_notice": fetch_hufs_notice,
+    "ai_notice": fetch_ai_notice,
 }
 
 MENU_HANDLERS = {

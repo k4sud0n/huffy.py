@@ -1,5 +1,7 @@
 from contextlib import asynccontextmanager
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
 
 import crawler
@@ -9,10 +11,7 @@ from menu.router import router as menu_router
 from notice.router import router as notice_router
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await db_init()
-
+async def crawl():
     notice_configs = [
         {
             "url": "11281",  # 한국외대 공지
@@ -30,12 +29,29 @@ async def lifespan(app: FastAPI):
             "url": "11284",  # 한국외대 채용
             "handler_key": "hufs_notice",
         },
+        {
+            "url": "https://builder.hufs.ac.kr/user/indexSub.action?codyMenuSeq=129898191&siteId=soft&page=1",  # AI교육원
+            "handler_key": "ai_notice",
+        },
     ]
 
     cafeteria_ids = ["h101", "h102", "h202", "h203", "h205"]
 
     await crawler.fetch_all_notices(notice_configs)
     await crawler.fetch_all_menus(cafeteria_ids)
+
+
+# APScheduler 설정
+scheduler = AsyncIOScheduler()
+
+# 매일 00:00에 실행
+scheduler.add_job(crawl, CronTrigger(hour=0, minute=0))
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await db_init()
+    await crawl()
     yield
     await db_close()
 
