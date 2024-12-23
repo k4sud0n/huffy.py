@@ -6,7 +6,7 @@ from models import Menu, Notice
 
 
 async def fetch_hufs_notice(url_id):
-    week_ago = datetime.now() - timedelta(days=7)
+    today = datetime.now().date()
     url = f"https://www.hufs.ac.kr/hufs/{url_id}/subview.do"
 
     async with aiohttp.ClientSession() as session:
@@ -23,7 +23,7 @@ async def fetch_hufs_notice(url_id):
                 except ValueError:
                     continue
 
-                if notice_date > week_ago:
+                if notice_date.date() == today:
                     notice_title = row.find("td:nth-child(2) strong").text().strip()
                     notice_link = (
                         "https://hufs.ac.kr"
@@ -38,7 +38,7 @@ async def fetch_hufs_notice(url_id):
 
 
 async def fetch_ai_notice(url):
-    week_ago = datetime.now() - timedelta(days=7)
+    today = datetime.now().date()
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -54,7 +54,7 @@ async def fetch_ai_notice(url):
                 except ValueError:
                     continue
 
-                if notice_date > week_ago:
+                if notice_date.date() == today:
                     notice_title = row.find("td.title a").text().strip()
                     notice_link = row.find("td.title a").attr("href")
                     notice_link = (
