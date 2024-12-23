@@ -57,6 +57,7 @@ scheduler.add_job(crawl, CronTrigger(hour=0, minute=0))
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await db_init()
+    scheduler.start()
     await crawl()
     yield
     await db_close()
