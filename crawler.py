@@ -79,7 +79,7 @@ async def fetch_menu(cafeteria_id):
             data = await response.text()
 
             doc = pq(data)
-            rows = doc("table tr[height='35'] td.listStyle")
+            rows = doc("table tr[height='35']")
 
             menu_items = [row.text() for row in rows.items()]
 
@@ -87,12 +87,18 @@ async def fetch_menu(cafeteria_id):
                 "date": today_date,
                 "location": cafeteria_id,
                 "menu1": (
-                    menu_items[0] if len(menu_items) > 0 else "등록된 메뉴가 없습니다."
+                    menu_items[1]
+                    if len(menu_items) > 1 and menu_items[0].startswith("요일/메뉴")
+                    else (
+                        menu_items[0]
+                        if len(menu_items) > 0
+                        else "등록된 메뉴가 없습니다."
+                    )
                 ),
-                "menu2": menu_items[1] if len(menu_items) > 1 else None,
-                "menu3": menu_items[2] if len(menu_items) > 2 else None,
-                "menu4": menu_items[3] if len(menu_items) > 3 else None,
-                "menu5": menu_items[4] if len(menu_items) > 4 else None,
+                "menu2": menu_items[2] if len(menu_items) > 2 else None,
+                "menu3": menu_items[3] if len(menu_items) > 3 else None,
+                "menu4": menu_items[4] if len(menu_items) > 4 else None,
+                "menu5": menu_items[5] if len(menu_items) > 5 else None,
             }
 
             await Menu.create(**menu_data)
