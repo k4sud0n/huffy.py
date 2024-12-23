@@ -35,7 +35,13 @@ async def crawl():
         },
     ]
 
-    cafeteria_ids = ["h101", "h102", "h202", "h203", "h205"]
+    cafeteria_ids = [
+        "h101",  # 인문관 식당
+        "h102",  # 교수회관 식당
+        "h202",  # 후생관 교직원 식당
+        "h203",  # 후생관 학생 식당
+        "h205",  # HufsDorm
+    ]
 
     await crawler.fetch_all_notices(notice_configs)
     await crawler.fetch_all_menus(cafeteria_ids)
