@@ -1,4 +1,4 @@
-import { getNotices } from "../lib/kv.js";
+import { getNotices } from "../lib/edge-config.js";
 import type {
   KakaoListCardResponse,
   KakaoErrorResponse,

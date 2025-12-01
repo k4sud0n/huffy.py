@@ -3,10 +3,17 @@ import * as cheerio from "cheerio";
 import {
   saveNotices,
   saveMenu,
-  getYesterdayKST,
   getTodayKST,
   type NoticeData,
-} from "../lib/kv.js";
+} from "../lib/edge-config.js";
+
+// 어제 날짜 (KST)
+function getYesterdayKST(): string {
+  const now = new Date();
+  const kstOffset = 9 * 60 * 60 * 1000;
+  const kstDate = new Date(now.getTime() + kstOffset - 24 * 60 * 60 * 1000);
+  return kstDate.toISOString().split("T")[0];
+}
 
 // 타임아웃 설정 (5초)
 const axiosInstance = axios.create({

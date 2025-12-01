@@ -1,4 +1,4 @@
-import { getMenu } from "../lib/kv.js";
+import { getMenu } from "../lib/edge-config.js";
 import type {
   KakaoCarouselResponse,
   KakaoErrorResponse,
