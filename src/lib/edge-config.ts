@@ -54,13 +54,20 @@ async function updateEdgeConfig(items: { key: string; value: unknown }[]): Promi
     ? `https://api.vercel.com/v1/edge-config/${edgeConfigId}/items?teamId=${teamId}`
     : `https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`;
 
+  // Edge Config API requires "operation" field: "upsert", "create", "update", or "delete"
+  const formattedItems = items.map((item) => ({
+    operation: "upsert" as const,
+    key: item.key,
+    value: item.value,
+  }));
+
   const response = await fetch(url, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${vercelApiToken}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ items }),
+    body: JSON.stringify({ items: formattedItems }),
   });
 
   if (!response.ok) {
@@ -115,15 +122,17 @@ export async function getNotices(limit: number = 5): Promise<NoticeData[]> {
   return allNotices.slice(0, limit);
 }
 
-// 메뉴 저장
-export async function saveMenu(location: string, date: string, items: string[]): Promise<void> {
+// 메뉴 일괄 저장 (race condition 방지)
+export async function saveMenus(menus: { location: string; date: string; items: string[] }[]): Promise<void> {
   // 기존 데이터 가져오기
   const existing = await get<Record<string, MenuData>>("menus");
   const updated = existing ? { ...existing } : {};
 
-  // 새 메뉴 추가
-  const key = `${location}:${date}`;
-  updated[key] = { location, date, items };
+  // 모든 메뉴 추가
+  for (const menu of menus) {
+    const key = `${menu.location}:${menu.date}`;
+    updated[key] = { location: menu.location, date: menu.date, items: menu.items };
+  }
 
   // 7일 이상 된 데이터 삭제
   const recentDates = new Set(getRecentDatesKST(7));

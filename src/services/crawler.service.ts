@@ -2,7 +2,7 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 import {
   saveNotices,
-  saveMenu,
+  saveMenus,
   getTodayKST,
   type NoticeData,
 } from "../lib/edge-config.js";
@@ -213,10 +213,13 @@ export async function crawlAll(): Promise<{
     await saveNotices(yesterday, allNotices);
   }
 
-  // 메뉴 저장
-  for (const menu of menuResults) {
-    await saveMenu(menu.location, today, menu.items);
-  }
+  // 메뉴 일괄 저장 (race condition 방지)
+  const menusToSave = menuResults.map((menu) => ({
+    location: menu.location,
+    date: today,
+    items: menu.items,
+  }));
+  await saveMenus(menusToSave);
 
   console.log(
     `Crawl completed: ${allNotices.length} notices, ${menuResults.length} menus`
