@@ -1,5 +1,28 @@
-.venv
-.idea
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Database
 db.sqlite3
 db.sqlite3-shm
 db.sqlite3-wal
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
